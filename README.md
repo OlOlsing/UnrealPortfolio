@@ -1,1 +1,1 @@
-# gomdi202202@gmail.com
+gomdi202202@gmail.com
