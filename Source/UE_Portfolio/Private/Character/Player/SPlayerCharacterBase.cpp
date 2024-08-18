@@ -23,8 +23,6 @@
 
 ASPlayerCharacterBase::ASPlayerCharacterBase()
 {
-	//commit으로만 될까?
-	//
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
@@ -78,8 +76,7 @@ void ASPlayerCharacterBase::BeginPlay()
 void ASPlayerCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	SetViewMode(EViewModePlayer::TPSView);
+	SetViewMode();
 }
 
 void ASPlayerCharacterBase::Tick(float DeltaSeconds)
@@ -88,27 +85,6 @@ void ASPlayerCharacterBase::Tick(float DeltaSeconds)
 
 	CurrentFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaSeconds, 35.f);
 	CameraComponent->SetFieldOfView(CurrentFOV);
-	//bUseControllerRotationYaw = false; // Test
-//	GetCharacterMovement()->bOrientRotationToMovement = true;
-
-	//GetCharacterMovement()->bOrientRotationToMovement = false;
-
-	if (bIsArmed)
-	{
-
-		bUseControllerRotationYaw = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 1080.f, 0.f);
-		//GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
-		GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
-	}
-
-	else
-	{
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 1080.f, 0.f);
-		//GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
-		GetCharacterMovement()->bOrientRotationToMovement = true; // 여기도 수정임
-	}
 
 	if (IsValid(GetController()) == true)
 	{
@@ -118,90 +94,23 @@ void ASPlayerCharacterBase::Tick(float DeltaSeconds)
 	}
 }
 
-void ASPlayerCharacterBase::SetViewMode(EViewModePlayer InViewMode)
+void ASPlayerCharacterBase::SetViewMode()
 {
-	if (CurrentViewMode == InViewMode)
-	{
-		return;
-	}
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
 
-	CurrentViewMode = InViewMode;
+	SpringArmComponent->TargetArmLength = 400.f;
+	SpringArmComponent->bUsePawnControlRotation = true;
+	SpringArmComponent->bInheritPitch = true;
+	SpringArmComponent->bInheritYaw = true;
+	SpringArmComponent->bInheritRoll = false;
+	SpringArmComponent->bDoCollisionTest = true;
+	SpringArmComponent->SetRelativeLocation(FVector(0.f, 50.f, 50.f));
 
-	switch (CurrentViewMode)
-	{
-	case EViewModePlayer::BackView:
-		bUseControllerRotationPitch = false;
-		bUseControllerRotationYaw = false;
-		bUseControllerRotationRoll = false;
-
-		/*SpringArmComponent->TargetArmLength = 400.f;
-		SpringArmComponent->SetRelativeRotation(FRotator::ZeroRotator);*/
-		// ControlRotation이 Pawn의 회전과 동기화 -> Pawn의 회전이 SpringArm의 회전 동기화. 이로 인해 SetRotation()이 무의미.
-
-		SpringArmComponent->bUsePawnControlRotation = true;
-
-		SpringArmComponent->bInheritPitch = true;
-		SpringArmComponent->bInheritYaw = true;
-		SpringArmComponent->bInheritRoll = false;
-
-		SpringArmComponent->bDoCollisionTest = true;
-
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-
-		break;
-	case EViewModePlayer::QuarterView:
-		bUseControllerRotationPitch = false;
-		bUseControllerRotationYaw = false;
-		bUseControllerRotationRoll = false;
-
-		/*	SpringArmComponent->TargetArmLength = 800.f;
-			SpringArmComponent->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));*/
-
-		SpringArmComponent->bUsePawnControlRotation = false;
-
-		SpringArmComponent->bInheritPitch = false;
-		SpringArmComponent->bInheritYaw = false;
-		SpringArmComponent->bInheritRoll = false;
-
-		SpringArmComponent->bDoCollisionTest = false;
-
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		break;
-	case EViewModePlayer::TPSView:
-	{
-		bUseControllerRotationPitch = false;
-		//bUseControllerRotationYaw = true;
-		bUseControllerRotationYaw = true;
-		bUseControllerRotationRoll = false;
-
-		SpringArmComponent->TargetArmLength = 400.f;
-
-		SpringArmComponent->bUsePawnControlRotation = true;
-
-		SpringArmComponent->bInheritPitch = true;
-		SpringArmComponent->bInheritYaw = true;
-		SpringArmComponent->bInheritRoll = false;
-
-		SpringArmComponent->bDoCollisionTest = true;
-
-		SpringArmComponent->SetRelativeLocation(FVector(0.f, 50.f, 50.f));
-
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 1080.f, 0.f);
-		//GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
-		GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
-		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-
-		break;
-	}
-	case EViewModePlayer::None:
-	case EViewModePlayer::End:
-	default:
-		break;
-	}
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 1080.f, 0.f);
+	GetCharacterMovement()->bOrientRotationToMovement = false; // 여기도 수정임
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 }
 
 void ASPlayerCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -213,7 +122,7 @@ void ASPlayerCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Move, ETriggerEvent::Triggered, this, &ThisClass::InputMove);
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::InputLook);
-		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ChangeView, ETriggerEvent::Started, this, &ThisClass::InputChangeView);
+		//EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ChangeView, ETriggerEvent::Started, this, &ThisClass::InputChangeView);
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Jump, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->QuickSlot01, ETriggerEvent::Started, this, &ThisClass::InputQuickSlot01);
 		//EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->QuickSlot02, ETriggerEvent::Started, this, &ThisClass::InputQuickSlot02);
@@ -234,9 +143,6 @@ void ASPlayerCharacterBase::InputMove(const FInputActionValue& InValue)
 		return;
 	}
 
-//	GetCharacterMovement()->bOrientRotationToMovement = true;
-
-	//
 	FVector2D MovementVector = InValue.Get<FVector2D>();
 	const FRotator ControlRotation = GetController()->GetControlRotation();
 	const FRotator ControlRotationYaw(0.f, ControlRotation.Yaw, 0.f);
@@ -259,30 +165,12 @@ void ASPlayerCharacterBase::InputLook(const FInputActionValue& InValue)
 	}
 
 	FVector2D LookVector = InValue.Get<FVector2D>();
-
-	switch (CurrentViewMode)
-	{
-	case EViewModePlayer::TPSView:
-	case EViewModePlayer::BackView:
-		AddControllerYawInput(LookVector.X);
-		AddControllerPitchInput(LookVector.Y);
-		break;
-	case EViewModePlayer::QuarterView:
-	case EViewModePlayer::None:
-	case EViewModePlayer::End:
-	default:
-		break;
-	}
-}
-
-void ASPlayerCharacterBase::InputChangeView(const FInputActionValue& InValue)
-{
-
+	AddControllerYawInput(LookVector.X);
+	AddControllerPitchInput(LookVector.Y);
 }
 
 void ASPlayerCharacterBase::InputQuickSlot01(const FInputActionValue& InValue)
 {
-	
 	USAnimInstance* AnimInstance = Cast<USAnimInstance>(GetMesh()->GetAnimInstance());
 
 	if (true == bIsArmed)
@@ -302,10 +190,6 @@ void ASPlayerCharacterBase::InputQuickSlot01(const FInputActionValue& InValue)
 	}
 
 	//bIsArmed = !bIsArmed;
-
-
-
-
 }
 
 void ASPlayerCharacterBase::InputQuickSlot02(const FInputActionValue& InValue)
@@ -444,24 +328,6 @@ void ASPlayerCharacterBase::TryFire()
 			{
 				AnimInstance->Montage_Play(FireRightAnimMontage);
 			}
-
-			//if (true == bIsRight)
-			//{
-			//	if (false == AnimInstance->Montage_IsPlaying(FireRightAnimMontage))
-			//	{
-			//		AnimInstance->Montage_Play(FireRightAnimMontage);
-			//	}
-			//}
-
-			//else
-			//{
-			//	if (false == AnimInstance->Montage_IsPlaying(FireLeftAnimMontage))
-			//	{
-			//		AnimInstance->Montage_Play(FireLeftAnimMontage);
-			//	}
-			//}
-
-			//bIsRight = !bIsRight;
 		}
 
 	/*	if (IsValid(FireShake) == true)
@@ -526,28 +392,28 @@ void ASPlayerCharacterBase::OnChangeArmStateEnd(UAnimMontage* Montage, bool bInt
 void ASPlayerCharacterBase::OnAttackEnd(UAnimMontage* Montage, bool bInterrupted)
 {
 
-	if (true == bIsArmed)
-	{
-		if (true == Montage->GetName().Equals(TEXT("AM_TravelMode_Start"), ESearchCase::IgnoreCase))
-		{
-			if (true == IsValid(UnarmedCharacterAnimLayer))
-			{
-				GetMesh()->LinkAnimClassLayers(UnarmedCharacterAnimLayer);
-			}
-		}
-	}
+	//if (true == bIsArmed)
+	//{
+	//	if (true == Montage->GetName().Equals(TEXT("AM_TravelMode_Start"), ESearchCase::IgnoreCase))
+	//	{
+	//		if (true == IsValid(UnarmedCharacterAnimLayer))
+	//		{
+	//			GetMesh()->LinkAnimClassLayers(UnarmedCharacterAnimLayer);
+	//		}
+	//	}
+	//}
 
-	else
-	{
-		if (true == Montage->GetName().Equals(TEXT("AM_TravelMode_End"), ESearchCase::IgnoreCase))
-		{
-			if (true == IsValid(ArmedCharacterAnimLayer))
-			{
-				GetMesh()->LinkAnimClassLayers(ArmedCharacterAnimLayer);
-			}
-		}
-	}
+	//else
+	//{
+	//	if (true == Montage->GetName().Equals(TEXT("AM_TravelMode_End"), ESearchCase::IgnoreCase))
+	//	{
+	//		if (true == IsValid(ArmedCharacterAnimLayer))
+	//		{
+	//			GetMesh()->LinkAnimClassLayers(ArmedCharacterAnimLayer);
+	//		}
+	//	}
+	//}
 
-	bIsArmed = !bIsArmed;
+	//bIsArmed = !bIsArmed;
 
 }

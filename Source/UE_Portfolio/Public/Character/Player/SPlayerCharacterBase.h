@@ -16,16 +16,6 @@ class ASWeaponActor;
 struct FStreamableHandle;
 class UCameraShakeBase;
 
-UENUM(BlueprintType)
-enum class EViewModePlayer : uint8
-{
-	None,
-	BackView,
-	QuarterView,
-	TPSView,
-	End
-};
-
 UCLASS()
 class UE_PORTFOLIO_API ASPlayerCharacterBase : public ASCharacter
 {
@@ -52,7 +42,7 @@ public:
 
 	bool GetArmed() const { return bIsArmed; }
 
-	void SetViewMode(EViewModePlayer InViewMode);
+	void SetViewMode();
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -61,7 +51,7 @@ protected:
 
 	void InputLook(const FInputActionValue& InValue);
 
-	void InputChangeView(const FInputActionValue& InValue);
+	//void InputChangeView(const FInputActionValue& InValue);
 
 	void InputQuickSlot01(const FInputActionValue& InValue);
 
@@ -106,8 +96,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UInputMappingContext> PlayerCharacterInputMappingContext;
-
-	EViewModePlayer CurrentViewMode = EViewModePlayer::None;
 
 	FVector DirectionToMove = FVector::ZeroVector;
 
