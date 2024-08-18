@@ -19,7 +19,6 @@ void ASGameMode::PostLogin(APlayerController* NewPlayer)
 	*/
 
 	Super::PostLogin(NewPlayer);
-
 	ASPlayerState* PlayerState = NewPlayer->GetPlayerState<ASPlayerState>();
 
 	if (true == ::IsValid(PlayerState))

@@ -100,7 +100,6 @@ void ASPlayerController::ToggleInGameMenu()
     else
     {
         InGameMenuInstance->SetVisibility(ESlateVisibility::Collapsed);
-
         FInputModeGameOnly InputModeGameOnly;
         SetInputMode(InputModeGameOnly);
 

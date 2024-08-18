@@ -26,13 +26,13 @@ public:
 
     void SetCurrentHP(float InCurrentHP);
 
-    float GetMaxBulletCnt() const { return MaxBulletCnt; }
+    int32 GetMaxBulletCnt() const { return MaxBulletCnt; }
 
-    void SetMaxBulletCnt(float InMaxBulletCnt) { MaxBulletCnt = InMaxBulletCnt; }
+    void SetMaxBulletCnt(int32 InMaxBulletCnt) { MaxBulletCnt = InMaxBulletCnt; }
 
-    int GetCurBulletCnt() const { return CurBulletCnt; }
+    int32 GetCurBulletCnt() const { return CurBulletCnt;}
 
-    void SetCurBulletCnt(int InCurBulletCnt) { CurBulletCnt = InCurBulletCnt; }
+    void SetCurBulletCnt(int32 InCurBulletCnt) { CurBulletCnt = InCurBulletCnt; }
 
 public:
     FOnOutOfCurrentHPDelegate OnOutOfCurrentHPDelegate;
@@ -53,8 +53,8 @@ private:
                                                                                                                             // CurHp는 객체마다 다 다르니 굳이 저장할 필요가 없으니 키워드 사용
 
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
-    int MaxBulletCnt = 8; // 임시 
+    int32 MaxBulletCnt = 1000; // 임시 
 
     UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
-    int CurBulletCnt = 8; // 임시
+    int32 CurBulletCnt = 1000; // 임시
 };

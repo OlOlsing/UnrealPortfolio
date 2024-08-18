@@ -40,8 +40,6 @@ public:
 	
 	virtual void Tick(float DeltaSeconds) override;
 
-
-
 	float GetForwardInputValue() const { return ForwardInputValue; }
 
 	float GetRightInputValue() const { return RightInputValue; }
@@ -187,7 +185,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> FireRightAnimMontage; // Shot(양쪽다 있긴한데 일단 Rt기준)
-private:
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UParticleSystemComponent> ParticleSystemComponent;
+private:
+
 };
