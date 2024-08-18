@@ -52,7 +52,7 @@ public:
 
 	bool GetArmed() const { return bIsArmed; }
 
-	void SetViewMode(EViewModePlayer InViewMode);
+	void SetViewMode();
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -61,7 +61,7 @@ protected:
 
 	void InputLook(const FInputActionValue& InValue);
 
-	void InputChangeView(const FInputActionValue& InValue);
+	//void InputChangeView(const FInputActionValue& InValue);
 
 	void InputQuickSlot01(const FInputActionValue& InValue);
 
