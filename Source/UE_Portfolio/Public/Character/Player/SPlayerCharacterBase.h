@@ -13,6 +13,7 @@ class UCameraComponent;
 class USInputConfig;
 class UInputMappingContext;
 class ASWeaponActor;
+class UTextRenderComponent;
 struct FStreamableHandle;
 class UCameraShakeBase;
 
@@ -191,6 +192,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UParticleSystemComponent> ParticleSystemComponent;
+
+	TArray<UTextRenderComponent*> DamageArray;
 private:
 
 };

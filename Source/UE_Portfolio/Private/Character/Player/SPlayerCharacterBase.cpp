@@ -4,6 +4,9 @@
 #include "Character/Player/SPlayerCharacterBase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/SInputConfig.h"
@@ -17,6 +20,7 @@
 #include "Game/SPlayerState.h"
 #include "Engine/StreamableManager.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Controller/SPlayerController.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
@@ -94,6 +98,20 @@ void ASPlayerCharacterBase::Tick(float DeltaSeconds)
 		FRotator ControlRotation = GetController()->GetControlRotation();
 		CurrentAimPitch = ControlRotation.Pitch;
 		CurrentAimYaw = ControlRotation.Yaw;
+	}
+
+	for (auto& iter : DamageArray)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		FVector CurrentLocation = iter->GetComponentLocation();
+		FRotator NewRotation = FRotationMatrix::MakeFromX(CameraLocation - CurrentLocation).Rotator();
+		iter->SetWorldRotation(NewRotation);
+
+		FVector NewLocation = CurrentLocation + FVector(0.f, 0.f, 200.f * DeltaSeconds);
+		iter->SetWorldLocation(NewLocation);
 	}
 }
 
@@ -300,6 +318,30 @@ void ASPlayerCharacterBase::TryFire()
 
 		if (IsCollided == true)
 		{
+			AActor* HitActor = HitResult.GetActor();
+			UGameplayStatics::ApplyPointDamage(
+				HitActor,
+				10.f,
+				HitActor->GetActorForwardVector(),
+				HitResult,
+				GetController(),
+				Cast<AActor>(this),
+				UDamageType::StaticClass()
+			);
+
+			UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
+			DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), 10)));
+			DamageText->SetTextRenderColor(FColor::White);
+			DamageText->SetWorldSize(30.f);
+			DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+			DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
+
+			DamageText->SetWorldLocation(HitResult.Location);
+			DamageText->RegisterComponent();
+			DamageArray.Add(DamageText);
+			//DamageText->AttachToComponent(HitActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			
+
 			ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
 			if (IsValid(HittedCharacter) == true)
 			{
@@ -310,14 +352,22 @@ void ASPlayerCharacterBase::TryFire()
 				UKismetSystemLibrary::PrintString(this, BoneNameString);
 				DrawDebugSphere(GetWorld(), HitResult.Location, 3.f, 16, FColor(255, 0, 0, 255), true, 20.f, 0U, 5.f);
 
+				//float DamageAmount = 0.f;
 				if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
 				{
 					HittedCharacter->TakeDamage(100.f, DamageEvent, GetController(), this);
+					//DamageAmount = 100.f;
 				}
 				else
 				{
 					HittedCharacter->TakeDamage(10.f, DamageEvent, GetController(), this);
+					//DamageAmount = 10.f;
+
 				}
+
+				//FVector HitLocation = HitResult.Location;
+				//FString DamageText = FString::Printf(TEXT("Damage: %f"), DamageAmount);
+				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, DamageText);
 			}
 		}
 

@@ -90,7 +90,7 @@ float ASMonsterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 		if (true == ::IsValid(DamageCauserCharacter))
 		{
 			ASPlayerState* SPlayerState = Cast<ASPlayerState>(DamageCauserCharacter->GetPlayerState());
-			if (IsValid(SPlayerState) == true)
+			if (true == IsValid(SPlayerState))
 			{
 				SPlayerState->AddCurrentKillCount(1);
 			}
