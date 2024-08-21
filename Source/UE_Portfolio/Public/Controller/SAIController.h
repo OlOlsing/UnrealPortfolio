@@ -15,6 +15,7 @@ class UE_PORTFOLIO_API ASAIController : public AAIController
 	GENERATED_BODY()
 
 	friend class ASNonPlayerCharacter;
+	friend class ASMonsterCharacter;
 
 public:
 	ASAIController();

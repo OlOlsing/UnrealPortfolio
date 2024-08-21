@@ -11,7 +11,7 @@
 #include "Item/SWeaponActor.h"
 #include "Component/SStatComponent.h"
 
-int32 ASCharacter::ShowAttackDebug = 0;
+int32 ASCharacter::ShowAttackDebug = 2;
 
 FAutoConsoleVariableRef CVarShowAttackDebug(
 	TEXT("UE_Portfolio.ShowAttackDebug"),

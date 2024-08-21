@@ -1,6 +1,7 @@
 #include "AI/BTDecorator_IsInAttackRange.h"
 #include "Controller/SAIController.h"
-#include "Character/SNonPlayerCharacter.h"
+//#include "Character/SNonPlayerCharacter.h"
+#include "Character/Monster/SMonsterCharacter.h"
 #include "Character/SCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -14,18 +15,18 @@ UBTDecorator_IsInAttackRange::UBTDecorator_IsInAttackRange()
 bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
 	bool bResult = Super::CalculateRawConditionValue(OwnerComp, NodeMemory);
-	checkf(bResult == true, TEXT("Super::CalculateRawConditionValue() function has returned false."));
+	checkf(true == bResult, TEXT("Super::CalculateRawConditionValue() function has returned false."));
 
 	ASAIController* AIController = Cast<ASAIController>(OwnerComp.GetAIOwner());
-	checkf(IsValid(AIController) == true, TEXT("Invalid AIController."));
+	checkf(true == IsValid(AIController), TEXT("Invalid AIController."));
 
-	ASNonPlayerCharacter* NPC = Cast<ASNonPlayerCharacter>(AIController->GetPawn());
-	checkf(IsValid(NPC) == true, TEXT("Invalid NPC."));
+	ASMonsterCharacter* Monster = Cast<ASMonsterCharacter>(AIController->GetPawn());
+	checkf(true == IsValid(Monster), TEXT("Invalid Monster."));
 
 	ASCharacter* TargetPlayerCharacter = Cast<ASCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASAIController::TargetActorKey));
-	if (IsValid(TargetPlayerCharacter) == true && TargetPlayerCharacter->IsPlayerControlled() == true)
+	if (true == IsValid(TargetPlayerCharacter) && true == TargetPlayerCharacter->IsPlayerControlled())
 	{
-		return NPC->GetDistanceTo(TargetPlayerCharacter) <= AttackRange;
+		return Monster->GetDistanceTo(TargetPlayerCharacter) <= AttackRange;
 	}
 
 	return false;
