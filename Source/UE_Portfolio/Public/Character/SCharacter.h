@@ -47,6 +47,7 @@ protected:
 	UFUNCTION()
 	void OnCharacterDeath();
 
+
 public:
 	static int32 ShowAttackDebug;
 
@@ -77,5 +78,4 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<USStatComponent> StatComponent;
-
 };

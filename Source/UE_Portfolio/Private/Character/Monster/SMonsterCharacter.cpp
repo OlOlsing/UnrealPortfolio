@@ -23,7 +23,7 @@ ASMonsterCharacter::ASMonsterCharacter()
 	AIControllerClass = ASAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	// 레벨에 배치되거나 새롭게 생성되면 SAIController의 빙의가 자동으로 진행됨.
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	GetCharacterMovement()->MaxWalkSpeed = 250.f;
 
 	WidgetComponent = CreateDefaultSubobject<USWidgetComponent>(TEXT("WidgetComponent"));
 	WidgetComponent->SetupAttachment(GetRootComponent());
@@ -32,6 +32,17 @@ ASMonsterCharacter::ASMonsterCharacter()
 	// Billboard 방식으로 보이나, 주인공 캐릭터를 가리게됨. 또한 UI와 멀어져도 동일한 크기가 유지됨.
 	WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	WidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ASMonsterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	USAnimInstance* AnimInstance = Cast<USAnimInstance>(GetMesh()->GetAnimInstance());
+	if (true == ::IsValid(AnimInstance))
+	{
+		AnimInstance->OnCheckMonsterDeath.AddDynamic(this, &ThisClass::OnCheckMonsterDeath);
+	}
+
 }
 
 void ASMonsterCharacter::BeginAttack()
@@ -86,7 +97,7 @@ float ASMonsterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 			//DamageCauserCharacter->AddCurrentKillCount(1);
 		}
 
-		Destroy();
+		//Destroy();
 	}
 
 	return FinalDamageAmount;
@@ -115,4 +126,9 @@ void ASMonsterCharacter::SetWidget(UStudyWidget* InStudyWidget)
 		HPBarWidget->InitializeHPBarWidget(StatComponent);
 		StatComponent->OnCurrentHPChangedDelegate.AddDynamic(HPBarWidget, &USW_HPBar::OnCurrentHPChange);
 	}
+}
+
+void ASMonsterCharacter::OnCheckMonsterDeath()
+{
+	Destroy();
 }

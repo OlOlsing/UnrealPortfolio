@@ -12,6 +12,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckAttackInput);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckPlayerDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckMonsterDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHaveToReload);
 
 
@@ -63,12 +65,22 @@ protected:
 	void AnimNotify_CheckAttackInput();
 
 	UFUNCTION()
+	void AnimNotify_CheckPlayerDeath();
+
+	UFUNCTION()
+	void AnimNotify_CheckMonsterDeath();
+
+	UFUNCTION()
 	void AnimNotify_CheckHaveToReload();
 
 public:
 	FOnCheckHit OnCheckHit;
 
 	FOnCheckAttackInput OnCheckAttackInput;
+
+	FOnCheckPlayerDeath OnCheckPlayerDeath;
+
+	FOnCheckMonsterDeath OnCheckMonsterDeath;
 
 	FOnCheckHaveToReload OnCheckHaveToReload;
 

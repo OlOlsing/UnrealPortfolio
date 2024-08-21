@@ -18,7 +18,14 @@ class UE_PORTFOLIO_API ASMonsterCharacter : public ASCharacter
 public:
 	ASMonsterCharacter();
 
+	float GetAttackStartRange() const { return AttackStartRange; }
+
+	float GetDetectRadius() const { return DetectRadius; }
+
+	
 protected:
+	virtual void BeginPlay() override;
+
 	virtual void BeginAttack() override;
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;
@@ -29,6 +36,9 @@ protected:
 
 	virtual void SetWidget(UStudyWidget* InStudyWidget) override;
 
+	UFUNCTION()
+	void OnCheckMonsterDeath();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
@@ -36,4 +46,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<USWidgetComponent> WidgetComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	float AttackStartRange = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	float DetectRadius = 500.f;
 };

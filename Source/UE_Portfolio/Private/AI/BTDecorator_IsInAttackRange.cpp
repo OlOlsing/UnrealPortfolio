@@ -5,7 +5,7 @@
 #include "Character/SCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-const float UBTDecorator_IsInAttackRange::AttackRange(200.f);
+const float UBTDecorator_IsInAttackRange::AttackRange(1000.f);
 
 UBTDecorator_IsInAttackRange::UBTDecorator_IsInAttackRange()
 {
@@ -26,7 +26,7 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 	ASCharacter* TargetPlayerCharacter = Cast<ASCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASAIController::TargetActorKey));
 	if (true == IsValid(TargetPlayerCharacter) && true == TargetPlayerCharacter->IsPlayerControlled())
 	{
-		return Monster->GetDistanceTo(TargetPlayerCharacter) <= AttackRange;
+		return Monster->GetDistanceTo(TargetPlayerCharacter) <= Monster->GetAttackStartRange();
 	}
 
 	return false;

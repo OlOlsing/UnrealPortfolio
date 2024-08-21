@@ -71,6 +71,7 @@ void ASPlayerCharacterBase::BeginPlay()
 	{
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::OnChangeArmStateEnd);
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::OnAttackEnd);
+		AnimInstance->OnCheckPlayerDeath.AddDynamic(this, &ThisClass::OnCheckPlayerDeath);
 	}
 }
 
@@ -419,5 +420,10 @@ void ASPlayerCharacterBase::OnAttackEnd(UAnimMontage* Montage, bool bInterrupted
 	//}
 
 	//bIsArmed = !bIsArmed;
+
+}
+
+void ASPlayerCharacterBase::OnCheckPlayerDeath()
+{
 
 }

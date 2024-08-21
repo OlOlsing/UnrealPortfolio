@@ -87,6 +87,9 @@ protected:
 	UFUNCTION()
 	void OnAttackEnd(UAnimMontage* Montage, bool bInterrupted);
 
+	UFUNCTION()
+	void OnCheckPlayerDeath();
+
 private:
 
 public:
