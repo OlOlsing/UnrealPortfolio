@@ -45,6 +45,22 @@ void ASMonsterCharacter::BeginPlay()
 
 }
 
+void ASMonsterCharacter::BeginRangedAttack()
+{
+	USAnimInstance* AnimInstance = Cast<USAnimInstance>(GetMesh()->GetAnimInstance());
+	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
+
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	bIsNowAttacking = true;
+	AnimInstance->PlayAnimMontage(RangedAttackMontage);
+
+	if (OnRangedAttackMontageEndedDelegate.IsBound() == false)
+	{
+		OnRangedAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+		AnimInstance->Montage_SetEndDelegate(OnRangedAttackMontageEndedDelegate, RangedAttackMontage);
+	}
+}
+
 void ASMonsterCharacter::BeginAttack()
 {
 	USAnimInstance* AnimInstance = Cast<USAnimInstance>(GetMesh()->GetAnimInstance());
@@ -66,10 +82,22 @@ void ASMonsterCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	bIsNowAttacking = false;
 
-	if (OnMeleeAttackMontageEndedDelegate.IsBound() == true)
+	if (MeleeAttackMontage == InMontage)
 	{
-		OnMeleeAttackMontageEndedDelegate.Unbind();
+		if (true == OnMeleeAttackMontageEndedDelegate.IsBound())
+		{
+			OnMeleeAttackMontageEndedDelegate.Unbind();
+		}
 	}
+
+	else if (RangedAttackMontage == InMontage)
+	{
+		if (true == OnRangedAttackMontageEndedDelegate.IsBound())
+		{
+			OnRangedAttackMontageEndedDelegate.Unbind();
+		}
+	}
+
 }
 
 float ASMonsterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,

@@ -14,11 +14,12 @@ class UE_PORTFOLIO_API ASMonsterCharacter : public ASCharacter
 	GENERATED_BODY()
 
 	friend class UBTTask_Attack;
+	friend class UBTTask_RangedAttack;
 
 public:
 	ASMonsterCharacter();
 
-	float GetAttackStartRange() const { return AttackStartRange; }
+	float GetMeleeAttackStartRange() const { return MeleeAttackStartRange; }
 
 	float GetDetectRadius() const { return DetectRadius; }
 
@@ -36,19 +37,24 @@ protected:
 
 	virtual void SetWidget(UStudyWidget* InStudyWidget) override;
 
+	virtual void BeginRangedAttack();
+
 	UFUNCTION()
 	void OnCheckMonsterDeath();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TObjectPtr<UAnimMontage> RangedAttackMontage;
 	// 당연한 이야기지만, BP_NPC > Details > MeleeAttackMontange에 AM_NPC_Fire 지정 필수.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<USWidgetComponent> WidgetComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	float AttackStartRange = 500.f;
+	float MeleeAttackStartRange = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	float DetectRadius = 500.f;

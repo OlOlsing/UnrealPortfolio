@@ -193,7 +193,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UParticleSystemComponent> ParticleSystemComponent;
 
-	TArray<UTextRenderComponent*> DamageArray;
+	TArray<TPair<float, UTextRenderComponent*>> DamageArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess)) // Meta에 단위를 넣어서 에디터 상에서 cm로 표시
+	float AlphaTime = 1.f;
 private:
 
 };

@@ -100,18 +100,46 @@ void ASPlayerCharacterBase::Tick(float DeltaSeconds)
 		CurrentAimYaw = ControlRotation.Yaw;
 	}
 
+	TArray <TPair<float, UTextRenderComponent*>> Temp;
 	for (auto& iter : DamageArray)
 	{
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-		FVector CurrentLocation = iter->GetComponentLocation();
+		FVector CurrentLocation = iter.Value->GetComponentLocation();
 		FRotator NewRotation = FRotationMatrix::MakeFromX(CameraLocation - CurrentLocation).Rotator();
-		iter->SetWorldRotation(NewRotation);
+		iter.Value->SetWorldRotation(NewRotation);
 
-		FVector NewLocation = CurrentLocation + FVector(0.f, 0.f, 200.f * DeltaSeconds);
-		iter->SetWorldLocation(NewLocation);
+		//FVector NewLocation = CurrentLocation + FVector(0.f, 0.f, 200.f * DeltaSeconds);
+		//iter.Value->SetWorldLocation(NewLocation);
+
+		iter.Key += DeltaSeconds;
+
+		if (0.f <= iter.Key && 0.5f > iter.Key)
+		{
+			iter.Value->SetWorldSize(iter.Value->WorldSize - (AlphaTime * DeltaSeconds));
+		}
+		
+		else if (0.5f <= iter.Key)
+		{
+			float Alpha = FMath::Clamp(1.0f - (iter.Key - 0.5f), 0.0f, 1.0f);
+			FLinearColor TextColor = iter.Value->TextRenderColor;
+			TextColor.A = Alpha;
+			iter.Value->SetTextRenderColor(TextColor.ToFColor(true));
+
+			if (0.f >= Alpha)
+			{
+				Temp.Add(iter);
+			}
+		}
+	}
+
+	for (auto& iter : Temp)
+	{
+		iter.Value->DestroyComponent();
+		iter.Value = nullptr;
+		DamageArray.Remove(iter);
 	}
 }
 
@@ -318,56 +346,57 @@ void ASPlayerCharacterBase::TryFire()
 
 		if (IsCollided == true)
 		{
-			AActor* HitActor = HitResult.GetActor();
-			UGameplayStatics::ApplyPointDamage(
-				HitActor,
-				10.f,
-				HitActor->GetActorForwardVector(),
-				HitResult,
-				GetController(),
-				Cast<AActor>(this),
-				UDamageType::StaticClass()
-			);
-
-			UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
-			DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), 10)));
-			DamageText->SetTextRenderColor(FColor::White);
-			DamageText->SetWorldSize(30.f);
-			DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-			DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
-
-			DamageText->SetWorldLocation(HitResult.Location);
-			DamageText->RegisterComponent();
-			DamageArray.Add(DamageText);
-			//DamageText->AttachToComponent(HitActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-			
-
 			ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
 			if (IsValid(HittedCharacter) == true)
 			{
 				FDamageEvent DamageEvent;
-				//HittedCharacter->TakeDamage(10.f, DamageEvent, GetController(), this);
-
 				FString BoneNameString = HitResult.BoneName.ToString(); // HitResult로 BoneName도 알 수 있다.
 				UKismetSystemLibrary::PrintString(this, BoneNameString);
 				DrawDebugSphere(GetWorld(), HitResult.Location, 3.f, 16, FColor(255, 0, 0, 255), true, 20.f, 0U, 5.f);
 
-				//float DamageAmount = 0.f;
+				float DamageAmount = 0.f;
 				if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
 				{
-					HittedCharacter->TakeDamage(100.f, DamageEvent, GetController(), this);
-					//DamageAmount = 100.f;
+					DamageAmount = 30.f;
+
 				}
 				else
 				{
-					HittedCharacter->TakeDamage(10.f, DamageEvent, GetController(), this);
-					//DamageAmount = 10.f;
-
+					DamageAmount = 10.f;
 				}
 
-				//FVector HitLocation = HitResult.Location;
-				//FString DamageText = FString::Printf(TEXT("Damage: %f"), DamageAmount);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, DamageText);
+				HittedCharacter->TakeDamage(DamageAmount, DamageEvent, GetController(), this);
+
+				AActor* HitActor = HitResult.GetActor();
+				UGameplayStatics::ApplyPointDamage(
+					HitActor,
+					DamageAmount,
+					HitActor->GetActorForwardVector(),
+					HitResult,
+					GetController(),
+					Cast<AActor>(this),
+					UDamageType::StaticClass()
+				);
+
+				UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
+				DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), FMath::RoundToInt(DamageAmount))));
+				DamageText->SetWorldSize(150.f);
+				DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+				DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
+
+				DamageText->SetWorldLocation(HitResult.Location);
+				if (30.f > DamageAmount)
+				{
+					DamageText->SetTextRenderColor(FColor::White);
+				}
+
+				else
+				{
+					DamageText->SetTextRenderColor(FColor::Red);
+				}
+				//DamageText->Set
+				DamageText->RegisterComponent();
+				DamageArray.Add({ 0.f, DamageText });
 			}
 		}
 

@@ -11,6 +11,7 @@ int32 ASAIController::ShowAIDebug(0);
 const FName ASAIController::StartPatrolPositionKey(TEXT("StartPatrolPosition"));
 const FName ASAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ASAIController::TargetActorKey(TEXT("TargetActor"));
+const FName ASAIController::TargetPlayerActorKey(TEXT("TargetPlayer"));
 
 FAutoConsoleVariableRef CVarShowAIDebug(
 	TEXT("Ue_Portfolio.ShowAIDebug"),

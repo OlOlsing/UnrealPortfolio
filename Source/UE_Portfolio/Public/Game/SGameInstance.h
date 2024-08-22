@@ -24,7 +24,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float MaxKillCount;
-
 };
 
 UCLASS()

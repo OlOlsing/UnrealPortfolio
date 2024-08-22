@@ -29,6 +29,8 @@ public:
 
 	virtual void SetWidget(UStudyWidget* InStudyWidget) {}
 
+	float GetMeleeAttackRange () const { return MeleeAttackRange; }
+
 protected:
 	UFUNCTION()
 	void OnMeleeAttackMontageEnded(UAnimMontage* InMontage, bool bInterruped);
@@ -69,6 +71,9 @@ protected:
 	bool bIsAttackKeyPressed = false;
 
 	FOnMontageEnded OnMeleeAttackMontageEndedDelegate;
+
+	FOnMontageEnded OnRangedAttackMontageEndedDelegate;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	float MeleeAttackRange = 50.f;

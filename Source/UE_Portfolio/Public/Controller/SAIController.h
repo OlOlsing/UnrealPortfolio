@@ -40,6 +40,8 @@ public:
 
 	static const FName TargetActorKey;
 
+	static const FName TargetPlayerActorKey;
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
