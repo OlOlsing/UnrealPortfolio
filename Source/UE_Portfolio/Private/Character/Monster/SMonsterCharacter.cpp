@@ -13,6 +13,7 @@
 #include "Component/SWidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Static/SBulletBase.h"
 #include "Game/SPlayerState.h"
 
 ASMonsterCharacter::ASMonsterCharacter()
@@ -58,6 +59,31 @@ void ASMonsterCharacter::BeginRangedAttack()
 	{
 		OnRangedAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
 		AnimInstance->Montage_SetEndDelegate(OnRangedAttackMontageEndedDelegate, RangedAttackMontage);
+	}
+	UWorld* World = GetWorld();
+	if (true == IsValid(World))
+	{
+		
+		//FVector Location;
+		//if (GetMesh()->DoesSocketExist(TEXT("CATRigHub001Bone005")))
+		//{
+		//	Location = GetMesh()->GetSocketLocation(TEXT("CATRigHub001Bone005")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
+		//}
+
+		//else
+		//{
+		//	Location = GetMesh()->GetSocketLocation(TEXT("HEAD")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
+		//}
+		
+		
+		//FVector Location = GetMesh()->GetSocketLocation(TEXT("CATRigHub001Bone005")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
+		FRotator Rotation = GetControlRotation();
+		BulletInstance = World->SpawnActor<ASBulletBase>(BulletClass, FVector::ZeroVector, FRotator::ZeroRotator);
+
+		if (BulletInstance)
+		{
+			Rotation = GetControlRotation();
+		}
 	}
 }
 

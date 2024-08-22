@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "SBulletBase.generated.h"
 
+class UProjectileMovementComponent;
+
 UCLASS()
 class UE_PORTFOLIO_API ASBulletBase : public AActor
 {
@@ -22,5 +24,25 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void Fire(const FVector& Driection) const;
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+public:
+
+	//UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+
+	///** 프로젝타일 무브먼트 컴포넌트*/
+	//UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	float InitSpeed = 30000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	float MaxSpeed = 30000.f;
 
 };

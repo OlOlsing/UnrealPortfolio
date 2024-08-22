@@ -7,6 +7,7 @@
 #include "SMonsterCharacter.generated.h"
 
 class USWidgetComponent;
+class ASBulletBase;
 
 UCLASS()
 class UE_PORTFOLIO_API ASMonsterCharacter : public ASCharacter
@@ -58,4 +59,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	float DetectRadius = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TSubclassOf<ASBulletBase> BulletClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TObjectPtr<ASBulletBase> BulletInstance;
 };
