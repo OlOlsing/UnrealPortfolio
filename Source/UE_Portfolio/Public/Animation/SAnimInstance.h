@@ -15,6 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckAttackInput);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckPlayerDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckMonsterDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHaveToReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckFireBullet);
 
 
 class UAnimMontage;
@@ -73,6 +74,9 @@ protected:
 	UFUNCTION()
 	void AnimNotify_CheckHaveToReload();
 
+	UFUNCTION()
+	void AnimNotify_CheckFireBullet();
+
 public:
 	FOnCheckHit OnCheckHit;
 
@@ -84,7 +88,7 @@ public:
 
 	FOnCheckHaveToReload OnCheckHaveToReload;
 
-	
+	FOnCheckFireBullet OnCheckFireBullet;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SAnimInstance", meta = (AllowPrivateAccess))

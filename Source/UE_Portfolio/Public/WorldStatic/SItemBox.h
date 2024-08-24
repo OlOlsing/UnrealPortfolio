@@ -9,7 +9,6 @@ class UE_PORTFOLIO_API ASItemBox : public AActor
 {
     GENERATED_BODY()
 
-public:
     ASItemBox();
 
 private:

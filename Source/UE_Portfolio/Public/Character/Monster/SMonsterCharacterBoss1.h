@@ -26,4 +26,15 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetWidget(UStudyWidget* InStudyWidget) override;
+
+	virtual void BeginRangedAttack() override;
+
+	virtual void RangedAttack1() override;
+
+	virtual void RangedAttack2() override;
+
+	virtual void MeleeAttack1() override;
+
+	virtual void MeleeAttack2() override;
+
 };

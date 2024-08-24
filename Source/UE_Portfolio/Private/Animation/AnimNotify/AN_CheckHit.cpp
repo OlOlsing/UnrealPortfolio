@@ -14,7 +14,7 @@ void UAN_CheckHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* A
 		ASCharacter* AttackingCharacter = Cast<ASCharacter>(MeshComp->GetOwner());
 		if (IsValid(AttackingCharacter) == true)
 		{
-			AttackingCharacter->OnCheckHit();
+ 			AttackingCharacter->OnCheckHit();
 		}
 	}
 }

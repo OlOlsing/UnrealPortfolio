@@ -123,7 +123,7 @@ void USAnimInstance::PlayAnimMontage(UAnimMontage* InAnimMontage)
 {
 	checkf(IsValid(InAnimMontage) == true, TEXT("Invalid InAnimMontage"));
 
-	if (Montage_IsPlaying(InAnimMontage) == false)
+	if (false == Montage_IsPlaying(InAnimMontage))
 	{
 		Montage_Play(InAnimMontage);
 	}
@@ -131,7 +131,7 @@ void USAnimInstance::PlayAnimMontage(UAnimMontage* InAnimMontage)
 
 void USAnimInstance::AnimNotify_CheckHit()
 {
-	if (OnCheckHit.IsBound() == true)
+	if (true == OnCheckHit.IsBound())
 	{
 		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
 		OnCheckHit.Broadcast();
@@ -140,7 +140,7 @@ void USAnimInstance::AnimNotify_CheckHit()
 
 void USAnimInstance::AnimNotify_CheckAttackInput()
 {
-	if (OnCheckAttackInput.IsBound() == true)
+	if (true == OnCheckAttackInput.IsBound())
 	{
 		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
 		OnCheckAttackInput.Broadcast();
@@ -149,7 +149,7 @@ void USAnimInstance::AnimNotify_CheckAttackInput()
 
 void USAnimInstance::AnimNotify_CheckPlayerDeath()
 {
-	if (OnCheckPlayerDeath.IsBound() == true)
+	if (true == OnCheckPlayerDeath.IsBound())
 	{
 		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
 		OnCheckPlayerDeath.Broadcast();
@@ -158,7 +158,7 @@ void USAnimInstance::AnimNotify_CheckPlayerDeath()
 
 void USAnimInstance::AnimNotify_CheckMonsterDeath()
 {
-	if (OnCheckMonsterDeath.IsBound() == true)
+	if (true == OnCheckMonsterDeath.IsBound())
 	{
 		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
 		OnCheckMonsterDeath.Broadcast();
@@ -167,10 +167,19 @@ void USAnimInstance::AnimNotify_CheckMonsterDeath()
 
 void USAnimInstance::AnimNotify_CheckHaveToReload()
 {
-	if (OnCheckHaveToReload.IsBound() == true)
+	if (true == OnCheckHaveToReload.IsBound())
 	{
 		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
 		//OnCheckAttackInput.Broadcast();
+	}
+}
+
+void USAnimInstance::AnimNotify_CheckFireBullet()
+{
+	if (true == OnCheckFireBullet.IsBound())
+	{
+		// 해당 델리게이트에 1개의 함수라도 바인드 되어 있다면 true를 반환하는 IsBound() 함수
+		OnCheckFireBullet.Broadcast();
 	}
 }
 

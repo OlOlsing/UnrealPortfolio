@@ -30,14 +30,21 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-public:
 
-	//UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+private:
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
+private:
 
-	///** 프로젝타일 무브먼트 컴포넌트*/
-	//UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
+	UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = ASBulletBase)
+	TObjectPtr<class USphereComponent> SphereComponent;
+
+	/** 프로젝타일 무브먼트 컴포넌트*/
+	UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	float InitSpeed = 30000.f;

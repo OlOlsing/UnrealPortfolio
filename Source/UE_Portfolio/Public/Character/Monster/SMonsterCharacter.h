@@ -40,8 +40,22 @@ protected:
 
 	virtual void BeginRangedAttack();
 
+	virtual void RangedAttack1();
+
+	virtual void RangedAttack2();
+
+	virtual void MeleeAttack1();
+
+	virtual void MeleeAttack2();
+
+
+
+
 	UFUNCTION()
 	void OnCheckMonsterDeath();
+
+	UFUNCTION()
+	void OnCheckFireBullet();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))

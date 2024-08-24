@@ -42,49 +42,14 @@ void ASMonsterCharacter::BeginPlay()
 	if (true == ::IsValid(AnimInstance))
 	{
 		AnimInstance->OnCheckMonsterDeath.AddDynamic(this, &ThisClass::OnCheckMonsterDeath);
+		AnimInstance->OnCheckFireBullet.AddDynamic(this, &ThisClass::OnCheckFireBullet);
 	}
 
 }
 
 void ASMonsterCharacter::BeginRangedAttack()
 {
-	USAnimInstance* AnimInstance = Cast<USAnimInstance>(GetMesh()->GetAnimInstance());
-	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
-
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	bIsNowAttacking = true;
-	AnimInstance->PlayAnimMontage(RangedAttackMontage);
-
-	if (OnRangedAttackMontageEndedDelegate.IsBound() == false)
-	{
-		OnRangedAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
-		AnimInstance->Montage_SetEndDelegate(OnRangedAttackMontageEndedDelegate, RangedAttackMontage);
-	}
-	UWorld* World = GetWorld();
-	if (true == IsValid(World))
-	{
-		
-		//FVector Location;
-		//if (GetMesh()->DoesSocketExist(TEXT("CATRigHub001Bone005")))
-		//{
-		//	Location = GetMesh()->GetSocketLocation(TEXT("CATRigHub001Bone005")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
-		//}
-
-		//else
-		//{
-		//	Location = GetMesh()->GetSocketLocation(TEXT("HEAD")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
-		//}
-		
-		
-		//FVector Location = GetMesh()->GetSocketLocation(TEXT("CATRigHub001Bone005")); //ÃÑ±¸ ÀÌ¸§, ¿¡¼Â ¹Ù²î¸é ÀÌ ÀÌ¸§µµ ¹Ù²ð µí, Blast´Â ½Ö±ÇÃÑ.. TryFire ÀçÁ¤ÀÇ ÇÊ¿ä
-		FRotator Rotation = GetControlRotation();
-		BulletInstance = World->SpawnActor<ASBulletBase>(BulletClass, FVector::ZeroVector, FRotator::ZeroRotator);
-
-		if (BulletInstance)
-		{
-			Rotation = GetControlRotation();
-		}
-	}
+	return;
 }
 
 void ASMonsterCharacter::BeginAttack()
@@ -182,7 +147,28 @@ void ASMonsterCharacter::SetWidget(UStudyWidget* InStudyWidget)
 	}
 }
 
+void ASMonsterCharacter::RangedAttack1()
+{
+}
+
+void ASMonsterCharacter::RangedAttack2()
+{
+}
+
+void ASMonsterCharacter::MeleeAttack1()
+{
+}
+
+void ASMonsterCharacter::MeleeAttack2()
+{
+}
+
 void ASMonsterCharacter::OnCheckMonsterDeath()
 {
 	Destroy();
+}
+
+void ASMonsterCharacter::OnCheckFireBullet()
+{
+	RangedAttack1();
 }
