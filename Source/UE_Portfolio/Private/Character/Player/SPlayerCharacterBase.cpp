@@ -77,13 +77,14 @@ void ASPlayerCharacterBase::BeginPlay()
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::OnAttackEnd);
 		AnimInstance->OnCheckPlayerDeath.AddDynamic(this, &ThisClass::OnCheckPlayerDeath);
 	}
+
+	SetViewMode();
 }
 
 void ASPlayerCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	SetViewMode();
 }
 
 void ASPlayerCharacterBase::Tick(float DeltaSeconds)

@@ -21,6 +21,11 @@ void ASPlayerController::BeginPlay()
     FInputModeGameOnly InputModeGameOnly;
     SetInputMode(InputModeGameOnly);
 
+    if (true == HasAuthority())
+    {
+        return;     //내 UI는 내 화면, 내 클라에서만 생성되어야 하니 서버라면 return
+    }
+
     if (IsValid(HUDWidgetClass) == true)
     {
         HUDWidget = CreateWidget<USHUD>(this, HUDWidgetClass); // 만들고

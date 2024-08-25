@@ -124,6 +124,11 @@ float ASMonsterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 void ASMonsterCharacter::Tick(float DeltaSeconds)
 {
+	if (true == HasAuthority())
+	{
+		return;     //서버라면 return;인데 여기인지 위인지 모름
+	}
+
 	Super::Tick(DeltaSeconds);
 
 	if (IsValid(WidgetComponent) == true)
