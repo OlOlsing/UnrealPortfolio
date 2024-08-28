@@ -34,6 +34,12 @@ public:
 
     void SetCurBulletCnt(int32 InCurBulletCnt) { CurBulletCnt = InCurBulletCnt; }
 
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+private:
+    UFUNCTION(NetMulticast, Reliable)
+    void OnCurrentHPChanged_NetMulticast(float InOldCurrentHP, float InNewCurrentHP);
+
 public:
     FOnOutOfCurrentHPDelegate OnOutOfCurrentHPDelegate;
 
@@ -45,12 +51,23 @@ private:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
     TObjectPtr<class USGameInstance> GameInstance;
 
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+
+    UPROPERTY(Replicated, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
     float MaxHP;
 
-    UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess)) // Transient - 이 키워드를 갖고 있는 속성은 툴에서 수정해도 무조건 CDO에 있는 값이 기본값
-    float CurrentHP;                                                                                                        // 휘발성이라 메모리 절약, 시리얼라이션 제외 등 이점,
-                                                                                                                            // CurHp는 객체마다 다 다르니 굳이 저장할 필요가 없으니 키워드 사용
+    UPROPERTY(Replicated, Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+    float CurrentHP;
+
+
+    //UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+    //float MaxHP;
+
+    //UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+    //float CurrentHP;                                                                                                       
+           
+    // Transient - 이 키워드를 갖고 있는 속성은 툴에서 수정해도 무조건 CDO에 있는 값이 기본값
+    // 휘발성이라 메모리 절약, 시리얼라이션 제외 등 이점,
+    // CurHp는 객체마다 다 다르니 굳이 저장할 필요가 없으니 키워드 사용
 
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
     int32 MaxBulletCnt = 1000; // 임시 

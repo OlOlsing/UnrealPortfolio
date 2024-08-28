@@ -7,6 +7,12 @@
 #include "Component/SStatComponent.h"
 #include "Character/SCharacter.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
+#include "Game/SGameMode.h"
+#include "UI/SGameResultWidget.h"
+#include "Components/TextBlock.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -72,6 +78,17 @@ void ASPlayerController::BeginPlay()
             CrosshairUIInstance->SetVisibility(ESlateVisibility::Visible);
         }
     }
+
+    if (IsValid(NotificationTextUIInstance) == true)
+    {
+        UUserWidget* NotificationTextUI = CreateWidget<UUserWidget>(this, NotificationTextUIInstance);
+        if (IsValid(NotificationTextUI) == true)
+        {
+            NotificationTextUI->AddToViewport(1);
+
+            NotificationTextUI->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
 }
 
 void ASPlayerController::SetupInputComponent()
@@ -114,4 +131,73 @@ void ASPlayerController::ToggleInGameMenu()
     }
 
     bIsInGameMenuOn = !bIsInGameMenuOn;
+}
+
+void ASPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ThisClass, NotificationText);
+}
+
+void ASPlayerController::OnOwningCharacterDead()
+{
+    ASGameMode* GameMode = Cast<ASGameMode>(UGameplayStatics::GetGameMode(this));
+    if (true == HasAuthority() && true == IsValid(GameMode))
+    {
+        GameMode->OnControllerDead(this);
+    }
+}
+
+void ASPlayerController::ShowWinnerUI_Implementation()
+{
+    if (HasAuthority() == false)
+    {
+        if (IsValid(WinnerUIClass) == true)
+        {
+            USGameResultWidget* WinnerUI = CreateWidget<USGameResultWidget>(this, WinnerUIClass);
+            if (IsValid(WinnerUI) == true)
+            {
+                WinnerUI->AddToViewport(3);
+                WinnerUI->RankingText->SetText(FText::FromString(TEXT("#01")));
+
+                FInputModeUIOnly Mode;
+                Mode.SetWidgetToFocus(WinnerUI->GetCachedWidget());
+                SetInputMode(Mode);
+
+                bShowMouseCursor = true;
+            }
+        }
+    }
+}
+
+void ASPlayerController::ShowLooserUI_Implementation(int32 InRanking)
+{
+    if (HasAuthority() == false)
+    {
+        if (IsValid(LooserUIClass) == true)
+        {
+            USGameResultWidget* LooserUI = CreateWidget<USGameResultWidget>(this, LooserUIClass);
+            if (IsValid(LooserUI) == true)
+            {
+                LooserUI->AddToViewport(3);
+                FString RankingString = FString::Printf(TEXT("#%02d"), InRanking);
+                LooserUI->RankingText->SetText(FText::FromString(RankingString));
+
+                FInputModeUIOnly Mode;
+                Mode.SetWidgetToFocus(LooserUI->GetCachedWidget());
+                SetInputMode(Mode);
+
+                bShowMouseCursor = true;
+            }
+        }
+    }
+}
+
+void ASPlayerController::ReturnToLobby_Implementation()
+{
+    if (false == HasAuthority())
+    { // 서버의 레벨이 변경되는걸 원치 않음. 클라가 이동해야하므로 if() 처리 필수.
+        UGameplayStatics::OpenLevel(GetWorld(), FName(TEXT("Loading")), true, FString(TEXT("NextLevel=Lobby?Saved=false")));
+    }
 }

@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StreamableManager.h"
+#include "Controller/SUIPlayerController.h"
 
 void UUW_LobbyLayout::NativeOnInitialized()
 {
@@ -70,21 +71,28 @@ void UUW_LobbyLayout::OnSubmitButtonClicked()
         return;
     }
 
-    const FString SavedDirectoryPath = FPaths::Combine(FPlatformMisc::ProjectDir(), TEXT("Saved"));
-    const FString SavedFileName(TEXT("PlayerInfo.txt"));
-    FString AbsoluteFilePath = FPaths::Combine(*SavedDirectoryPath, *SavedFileName);
-    FPaths::MakeStandardFilename(AbsoluteFilePath);
+    //const FString SavedDirectoryPath = FPaths::Combine(FPlatformMisc::ProjectDir(), TEXT("Saved"));
+    //const FString SavedFileName(TEXT("PlayerInfo.txt"));
+    //FString AbsoluteFilePath = FPaths::Combine(*SavedDirectoryPath, *SavedFileName);
+    //FPaths::MakeStandardFilename(AbsoluteFilePath);
 
-    TSharedRef<FJsonObject> PlayerInfoJsonObject = MakeShared<FJsonObject>();
-    PlayerInfoJsonObject->SetStringField("playername", PlayerName);
-    PlayerInfoJsonObject->SetNumberField("team", SelectedTeam);
+    //TSharedRef<FJsonObject> PlayerInfoJsonObject = MakeShared<FJsonObject>();
+    //PlayerInfoJsonObject->SetStringField("playername", PlayerName);
+    //PlayerInfoJsonObject->SetNumberField("team", SelectedTeam);
 
-    FString PlayerInfoJsonString;
-    TSharedRef<TJsonWriter<TCHAR>> JsonWriterArchive = TJsonWriterFactory<TCHAR>::Create(&PlayerInfoJsonString);
-    if (FJsonSerializer::Serialize(PlayerInfoJsonObject, JsonWriterArchive) == true)
+    //FString PlayerInfoJsonString;
+    //TSharedRef<TJsonWriter<TCHAR>> JsonWriterArchive = TJsonWriterFactory<TCHAR>::Create(&PlayerInfoJsonString);
+    //if (FJsonSerializer::Serialize(PlayerInfoJsonObject, JsonWriterArchive) == true)
+    //{
+    //    FFileHelper::SaveStringToFile(PlayerInfoJsonString, *AbsoluteFilePath);
+    //}
+
+    ASUIPlayerController* PlayerController = GetOwningPlayer<ASUIPlayerController>();
+    if (true == ::IsValid(PlayerController))
     {
-        FFileHelper::SaveStringToFile(PlayerInfoJsonString, *AbsoluteFilePath);
+        FText ServerIP = EditServerIP->GetText();
+        PlayerController->JoinServer(ServerIP.ToString());
     }
 
-    UGameplayStatics::OpenLevel(GetWorld(), TEXT("Loading"), true, FString(TEXT("NextLevel=Example")));
+   // UGameplayStatics::OpenLevel(GetWorld(), TEXT("Loading"), true, FString(TEXT("NextLevel=Example")));
 }

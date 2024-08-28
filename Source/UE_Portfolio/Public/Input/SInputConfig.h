@@ -43,4 +43,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> Trigger;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> LandMine;
 };

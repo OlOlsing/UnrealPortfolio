@@ -3,6 +3,7 @@
 
 #include "Character/SCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Controller/SPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/EngineTypes.h"
@@ -10,6 +11,9 @@
 #include "Animation/SAnimInstance.h"
 #include "Item/SWeaponActor.h"
 #include "Component/SStatComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Game/SGameState.h"
+
 
 int32 ASCharacter::ShowAttackDebug = 2;
 
@@ -43,7 +47,7 @@ ASCharacter::ASCharacter()
 
 	//bIsDead = false;
 	StatComponent = CreateDefaultSubobject<USStatComponent>(TEXT("StatComponent"));
-
+	StatComponent->SetIsReplicated(true);
 }
 
 void ASCharacter::BeginPlay()
@@ -69,6 +73,12 @@ float ASCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	ASGameState* SGameState = Cast<ASGameState>(UGameplayStatics::GetGameState(this));
+	if (true == IsValid(SGameState) && EMatchState::Playing != SGameState->MatchState)
+	{
+		return FinalDamageAmount;
+	}
 
 	StatComponent->SetCurrentHP(StatComponent->GetCurrentHP() - FinalDamageAmount);
 
@@ -200,6 +210,12 @@ void ASCharacter::OnCharacterDeath()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+	ASPlayerController* PlayerController = GetController<ASPlayerController>();
+	if (IsValid(PlayerController) == true && HasAuthority() == true)
+	{
+		PlayerController->OnOwningCharacterDead();
+	}
 }
 
 void ASCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

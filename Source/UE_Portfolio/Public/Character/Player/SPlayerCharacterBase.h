@@ -53,6 +53,8 @@ public:
 
 	void SetViewMode();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
@@ -82,6 +84,11 @@ protected:
 
 	void StopFire(const FInputActionValue& InValue);
 
+	void SpawnLandMine(const FInputActionValue& InValue);
+
+	UFUNCTION(Server, Reliable, WithValidation) //Server에서 실행, 무조건 수행되게(디폴트는 조금은 씹혀도 상관없다는 Unreliable), 위변조 검증용 함수를 정의해서 사용
+	void SpawnLandMine_Server();
+
 	UFUNCTION()
 	void OnChangeArmStateEnd(UAnimMontage* Montage, bool bInterrupted);
 
@@ -90,6 +97,24 @@ protected:
 
 	UFUNCTION()
 	void OnCheckPlayerDeath();
+
+	UFUNCTION(Server, Unreliable) // 한 두번 정도는 씹혀도 되기 때문.
+	void UpdateInputValue_Server(const float& InForwardInputValue, const float& InRightInputValue);
+
+	UFUNCTION(Server, Unreliable)
+	void UpdateAimValue_Server(const float& InAimPitchValue, const float& InAimYawValue);
+
+	UFUNCTION(Server, Unreliable)
+	void PlayAttackMontage_Server();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void PlayAttackMontage_NetMulticast();
+
+	UFUNCTION(Server, Reliable) // 정밀하게
+	void ApplyDamageAndDrawLine_Server(FHitResult HitResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void DrawLine_NetMulticast(const FVector& InDrawStart, const FVector& InDrawEnd);
 
 private:
 
@@ -121,11 +146,15 @@ protected:
 
 	float ArmRotationChangeSpeed = 10.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float ForwardInputValue;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	float PreviousForwardInputValue = 0.f;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float RightInputValue;
+
+	float PreviousRightInputValue = 0.f;
 
 	FSoftObjectPath CurrentPlayerCharacterMeshMaterialPath = FSoftObjectPath();
 
@@ -144,9 +173,15 @@ protected:
 
 	float TimeBetweenFire;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float CurrentAimPitch = 0.f;
 
+	float PreviousAimPitch = 0.f;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float CurrentAimYaw = 0.f;
+
+	float PreviousAimYaw = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = ASPlayerCharacterBase, Meta = (AllowPrivateAccess = true))
 	TSubclassOf<UCameraShakeBase> FireShake;
@@ -192,6 +227,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UParticleSystemComponent> ParticleSystemComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ASPlayerCharacter, Meta = (AllowPrivateAccess = true))
+	TSubclassOf<AActor> LandMineClass;
 
 	TArray<TPair<float, UTextRenderComponent*>> DamageArray;
 

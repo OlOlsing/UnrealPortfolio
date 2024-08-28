@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = USLobbyLevelUI, Meta = (AllowPrivateAccess, BindWidget))
 	TObjectPtr<UButton> SubmitButton;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = USLobbyLevelUI, Meta = (AllowPrivateAccess, BindWidget))
+	TObjectPtr<UEditableText> EditServerIP;
+
 	TWeakObjectPtr<USkeletalMeshComponent> CurrentSkeletalMeshComponent;
 
 	TArray<TSharedPtr<FStreamableHandle>> StreamableHandles;
@@ -53,5 +56,7 @@ protected:
 	TArray<TSoftObjectPtr<UMaterial>> LoadedMaterialInstanceAssets;
 
 	uint8 SelectedTeam = 1;
+
+
 
 };

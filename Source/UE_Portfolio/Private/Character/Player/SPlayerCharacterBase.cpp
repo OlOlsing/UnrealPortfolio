@@ -7,6 +7,7 @@
 #include "Components/TextRenderComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TextBlock.h"
+#include "WorldStatic/SLandMine.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/SInputConfig.h"
@@ -24,6 +25,8 @@
 #include "Controller/SPlayerController.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/Engine.h"
 
 ASPlayerCharacterBase::ASPlayerCharacterBase()
 {
@@ -96,9 +99,28 @@ void ASPlayerCharacterBase::Tick(float DeltaSeconds)
 
 	if (IsValid(GetController()) == true)
 	{
+		PreviousAimPitch = CurrentAimPitch;
+		PreviousAimYaw = CurrentAimYaw;
+
 		FRotator ControlRotation = GetController()->GetControlRotation();
 		CurrentAimPitch = ControlRotation.Pitch;
 		CurrentAimYaw = ControlRotation.Yaw;
+	}
+
+	if (PreviousAimPitch != CurrentAimPitch || PreviousAimYaw != CurrentAimYaw)
+	{
+		if (false == HasAuthority())
+		{
+			UpdateAimValue_Server(CurrentAimPitch, CurrentAimYaw);
+		}
+	}
+
+	if (PreviousForwardInputValue != ForwardInputValue || PreviousRightInputValue != RightInputValue)
+	{
+		if (false == HasAuthority())
+		{
+			UpdateInputValue_Server(ForwardInputValue, RightInputValue);
+		}
 	}
 
 	TArray <TPair<float, UTextRenderComponent*>> Temp;
@@ -183,6 +205,7 @@ void ASPlayerCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		//EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Trigger, ETriggerEvent::Started, this, &ThisClass::ToggleTrigger);
 		//EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Attack, ETriggerEvent::Started, this, &ThisClass::StartFire);
 		//EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Attack, ETriggerEvent::Completed, this, &ThisClass::StopFire);
+		EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->LandMine, ETriggerEvent::Started, this, &ThisClass::SpawnLandMine);
 	}
 }
 
@@ -345,61 +368,63 @@ void ASPlayerCharacterBase::TryFire()
 
 #pragma endregion
 
-		if (IsCollided == true)
-		{
-			ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
-			if (IsValid(HittedCharacter) == true)
-			{
-				FDamageEvent DamageEvent;
-				FString BoneNameString = HitResult.BoneName.ToString(); // HitResult로 BoneName도 알 수 있다.
-				UKismetSystemLibrary::PrintString(this, BoneNameString);
-				DrawDebugSphere(GetWorld(), HitResult.Location, 3.f, 16, FColor(255, 0, 0, 255), true, 20.f, 0U, 5.f);
+		//if (IsCollided == true)
+		//{
+		//	ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
+		//	if (IsValid(HittedCharacter) == true)
+		//	{
+		//		FDamageEvent DamageEvent;
+		//		FString BoneNameString = HitResult.BoneName.ToString(); // HitResult로 BoneName도 알 수 있다.
+		//		UKismetSystemLibrary::PrintString(this, BoneNameString);
+		//		DrawDebugSphere(GetWorld(), HitResult.Location, 3.f, 16, FColor(255, 0, 0, 255), true, 20.f, 0U, 5.f);
 
-				float DamageAmount = 0.f;
-				if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
-				{
-					DamageAmount = 30.f;
+		//		float DamageAmount = 0.f;
+		//		if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
+		//		{
+		//			DamageAmount = 30.f;
 
-				}
-				else
-				{
-					DamageAmount = 10.f;
-				}
+		//		}
+		//		else
+		//		{
+		//			DamageAmount = 10.f;
+		//		}
 
-				HittedCharacter->TakeDamage(DamageAmount, DamageEvent, GetController(), this);
+		//		HittedCharacter->TakeDamage(DamageAmount, DamageEvent, GetController(), this);
 
-				AActor* HitActor = HitResult.GetActor();
-				UGameplayStatics::ApplyPointDamage(
-					HitActor,
-					DamageAmount,
-					HitActor->GetActorForwardVector(),
-					HitResult,
-					GetController(),
-					Cast<AActor>(this),
-					UDamageType::StaticClass()
-				);
+		//		AActor* HitActor = HitResult.GetActor();
+		//		UGameplayStatics::ApplyPointDamage(
+		//			HitActor,
+		//			DamageAmount,
+		//			HitActor->GetActorForwardVector(),
+		//			HitResult,
+		//			GetController(),
+		//			Cast<AActor>(this),
+		//			UDamageType::StaticClass()
+		//		);
 
-				UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
-				DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), FMath::RoundToInt(DamageAmount))));
-				DamageText->SetWorldSize(150.f);
-				DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-				DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
+		//		UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
+		//		DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), FMath::RoundToInt(DamageAmount))));
+		//		DamageText->SetWorldSize(150.f);
+		//		DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+		//		DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
 
-				DamageText->SetWorldLocation(HitResult.Location);
-				if (30.f > DamageAmount)
-				{
-					DamageText->SetTextRenderColor(FColor::White);
-				}
+		//		DamageText->SetWorldLocation(HitResult.Location);
+		//		if (30.f > DamageAmount)
+		//		{
+		//			DamageText->SetTextRenderColor(FColor::White);
+		//		}
 
-				else
-				{
-					DamageText->SetTextRenderColor(FColor::Red);
-				}
-				//DamageText->Set
-				DamageText->RegisterComponent();
-				DamageArray.Add({ 0.f, DamageText });
-			}
-		}
+		//		else
+		//		{
+		//			DamageText->SetTextRenderColor(FColor::Red);
+		//		}
+		//		//DamageText->Set
+		//		DamageText->RegisterComponent();
+		//		DamageArray.Add({ 0.f, DamageText });
+		//	}
+		//}
+
+		ApplyDamageAndDrawLine_Server(HitResult);
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (true == IsValid(AnimInstance))
@@ -413,12 +438,15 @@ void ASPlayerCharacterBase::TryFire()
 			{
 				AnimInstance->Montage_Play(FireRightAnimMontage);
 			}
+
+			PlayAttackMontage_Server();
+			
 		}
 
-	/*	if (IsValid(FireShake) == true)
-		{
-			PlayerController->ClientStartCameraShake(FireShake);
-		}*/
+		//if (true == IsValid(FireShake) && GetOwner() == UGameplayStatics::GetPlayerController(this, 0)) // 내 화면에만 Shake
+		//{
+		//	PlayerController->ClientStartCameraShake(FireShake);
+		//}
 
 	}
 }
@@ -443,6 +471,26 @@ void ASPlayerCharacterBase::StartFire(const FInputActionValue& InValue)
 
 void ASPlayerCharacterBase::StopFire(const FInputActionValue& InValue)
 {
+}
+
+void ASPlayerCharacterBase::SpawnLandMine(const FInputActionValue& InValue)
+{
+	SpawnLandMine_Server();
+}
+
+bool ASPlayerCharacterBase::SpawnLandMine_Server_Validate() // 이 함수는 WithValidation키워드를 붙이지 않았으면 만들지 않아도 되지만
+{
+	return true;
+}
+
+void ASPlayerCharacterBase::SpawnLandMine_Server_Implementation() // RPC문법을 사용한다면 무조건 Implementation이 붙은 함수로 구현부를 만들어야 함
+{
+	if (true == IsValid(LandMineClass))
+	{
+		FVector SpawnedLocation = (GetActorLocation() + GetActorForwardVector() * 200.f) - FVector(0.f, 0.f, 90.f);
+		ASLandMine* SpawnedLandMine = GetWorld()->SpawnActor<ASLandMine>(LandMineClass, SpawnedLocation, FRotator::ZeroRotator);
+		SpawnedLandMine->SetOwner(GetController());
+	}
 }
 
 void ASPlayerCharacterBase::OnChangeArmStateEnd(UAnimMontage* Montage, bool bInterrupted)
@@ -506,4 +554,117 @@ void ASPlayerCharacterBase::OnAttackEnd(UAnimMontage* Montage, bool bInterrupted
 void ASPlayerCharacterBase::OnCheckPlayerDeath()
 {
 
+}
+
+void ASPlayerCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, ForwardInputValue);
+	DOREPLIFETIME(ThisClass, RightInputValue);
+	DOREPLIFETIME(ThisClass, CurrentAimPitch);
+	DOREPLIFETIME(ThisClass, CurrentAimYaw);
+}
+
+void ASPlayerCharacterBase::UpdateInputValue_Server_Implementation(const float& InForwardInputValue,
+	const float& InRightInputValue)
+{
+	ForwardInputValue = InForwardInputValue;
+	RightInputValue = InRightInputValue;
+}
+
+void ASPlayerCharacterBase::UpdateAimValue_Server_Implementation(const float& InAimPitchValue, const float& InAimYawValue)
+{
+	CurrentAimPitch = InAimPitchValue;
+	CurrentAimYaw = InAimYawValue;
+}
+
+void ASPlayerCharacterBase::PlayAttackMontage_Server_Implementation()
+{
+	PlayAttackMontage_NetMulticast();
+}
+
+void ASPlayerCharacterBase::PlayAttackMontage_NetMulticast_Implementation()
+{
+	if (false == HasAuthority() && GetOwner() != UGameplayStatics::GetPlayerController(this, 0))
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (true == IsValid(AnimInstance))
+		{
+			if (false == AnimInstance->Montage_IsPlaying(FireLeftAnimMontage))
+			{
+				AnimInstance->Montage_Play(FireLeftAnimMontage);
+			}
+
+			else
+			{
+				AnimInstance->Montage_Play(FireRightAnimMontage);
+			}
+		}
+	}
+}
+
+void ASPlayerCharacterBase::ApplyDamageAndDrawLine_Server_Implementation(FHitResult HitResult)
+{
+	ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
+	if (IsValid(HittedCharacter) == true)
+	{
+		FDamageEvent DamageEvent;
+
+		FString BoneNameString = HitResult.BoneName.ToString();
+
+		float DamageAmount = 0.f;
+		if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
+		{
+			DamageAmount = 30.f;
+
+		}
+		else
+		{
+			DamageAmount = 10.f;
+		}
+
+		HittedCharacter->TakeDamage(DamageAmount, DamageEvent, GetController(), this);
+
+		AActor* HitActor = HitResult.GetActor();
+		UGameplayStatics::ApplyPointDamage(
+			HitActor,
+			DamageAmount,
+			HitActor->GetActorForwardVector(),
+			HitResult,
+			GetController(),
+			Cast<AActor>(this),
+			UDamageType::StaticClass()
+		);
+
+		UTextRenderComponent* DamageText = NewObject<UTextRenderComponent>(HitActor);
+		DamageText->SetText(FText::FromString(FString::Printf(TEXT("% d"), FMath::RoundToInt(DamageAmount))));
+		DamageText->SetWorldSize(150.f);
+		DamageText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+		DamageText->SetVerticalAlignment(EVerticalTextAligment::EVRTA_TextCenter);
+
+		DamageText->SetWorldLocation(HitResult.Location);
+		if (30.f > DamageAmount)
+		{
+			DamageText->SetTextRenderColor(FColor::White);
+		}
+
+		else
+		{
+			DamageText->SetTextRenderColor(FColor::Red);
+		}
+
+		DamageText->RegisterComponent();
+		DamageArray.Add({ 0.f, DamageText });
+	}
+
+	DrawLine_NetMulticast(HitResult.TraceStart, HitResult.TraceEnd);
+}
+
+void ASPlayerCharacterBase::DrawLine_NetMulticast_Implementation(const FVector& InDrawStart, const FVector& InDrawEnd)
+{
+	if (false == HasAuthority())
+	{
+		DrawDebugLine(GetWorld(), GetMesh()->GetSocketLocation(TEXT("Muzzle_01")), InDrawEnd, FColor(255, 255, 255, 64), false, 0.1f, 0U, 0.5f);
+	}
 }

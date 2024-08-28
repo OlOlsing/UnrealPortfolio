@@ -33,6 +33,8 @@ ASMonsterCharacter::ASMonsterCharacter()
 	// Billboard 방식으로 보이나, 주인공 캐릭터를 가리게됨. 또한 UI와 멀어져도 동일한 크기가 유지됨.
 	WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	WidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	//bReplicates = true;
 }
 
 void ASMonsterCharacter::BeginPlay()
@@ -124,9 +126,9 @@ float ASMonsterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 void ASMonsterCharacter::Tick(float DeltaSeconds)
 {
-	if (true == HasAuthority())
+	if (false == HasAuthority())
 	{
-		return;     //서버라면 return;인데 여기인지 위인지 모름
+		return;    
 	}
 
 	Super::Tick(DeltaSeconds);
